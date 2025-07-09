@@ -983,8 +983,7 @@
                         contactEmail: 'info@ppitiongkok.org',
                         whatsapp: '+86 123 4567 8900',
                         instagram: '@ppitiongkok',
-                        facebook: 'PPIT Official',
-                        adminPassword: 'ppit2025'
+                        facebook: 'PPIT Official'
                     }));
                 }
             },
@@ -1048,21 +1047,28 @@
         }
 
         // Login
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const username = this.username.value;
             const password = this.password.value;
             const settings = JSON.parse(localStorage.getItem('ppit_settings'));
 
-            if (username === 'admin' && password === (settings.adminPassword || 'ppit2025')) {
-                sessionStorage.setItem('ppit_admin_logged_in', 'true');
-                isLoggedIn = true;
-                checkAuth();
-            } else {
+            const response = await fetch('/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
                 document.getElementById('loginError').style.display = 'block';
                 setTimeout(() => {
                     document.getElementById('loginError').style.display = 'none';
                 }, 3000);
+            } else {
+                sessionStorage.setItem('ppit_admin_logged_in', 'true');
+                isLoggedIn = true;
+                checkAuth();
             }
         });
 
@@ -1428,45 +1434,26 @@
             form.facebook.value = settings.facebook;
         }
 
-        document.getElementById('settingsForm').addEventListener('submit', function(e) {
+        document.getElementById('settingsForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const formData = new FormData(this);
-            const settings = JSON.parse(localStorage.getItem('ppit_settings'));
 
-            // Update contact info
-            settings.contactEmail = formData.get('contactEmail');
-            settings.whatsapp = formData.get('whatsapp');
-            settings.instagram = formData.get('instagram');
-            settings.facebook = formData.get('facebook');
-
-            // Update password if provided
             const oldPassword = formData.get('oldPassword');
             const newPassword = formData.get('newPassword');
             const confirmPassword = formData.get('confirmPassword');
 
-            if (oldPassword) {
-                if (oldPassword !== settings.adminPassword) {
-                    alert('Password lama tidak sesuai!');
-                    return;
-                }
-                if (newPassword !== confirmPassword) {
-                    alert('Password baru dan konfirmasi tidak sama!');
-                    return;
-                }
-                if (newPassword.length < 6) {
-                    alert('Password baru minimal 6 karakter!');
-                    return;
-                }
-                settings.adminPassword = newPassword;
-            }
+            const response = await fetch('/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword, newPassword, confirmPassword })
+            });
 
-            localStorage.setItem('ppit_settings', JSON.stringify(settings));
-            showSuccess('Pengaturan berhasil disimpan!');
-            
-            // Clear password fields
-            this.oldPassword.value = '';
-            this.newPassword.value = '';
-            this.confirmPassword.value = '';
+            const result = await response.json();
+            if (!response.ok) {
+                alert(result.error);
+            } else {
+                alert('Password berhasil diubah!');
+            }
         });
 
         // Initialize
