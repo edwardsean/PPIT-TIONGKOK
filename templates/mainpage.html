@@ -111,17 +111,32 @@
         }
 
         .nav-logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 50px; /* Increased width for rectangular shape */
+            height: 40px; /* Keep original height */
             background: white;
-            border-radius: 8px;
+            border-radius: 8px; /* Rectangular with rounded corners */
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: var(--primary-red);
             transition: transform 0.3s ease;
+            overflow: hidden; /* Ensures image stays within bounds */
+            padding: 4px; /* Small padding around the image */
         }
+
+        .nav-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Shows full image without cropping */
+            border-radius: 4px; /* Slightly smaller radius than container */
+            background: white; /* White background in case image has transparency */
+        }
+        
+        .nav-logo-icon {
+            font-size: 14px; /* Smaller font for the wider container */
+        }
+        
 
         .nav-logo:hover .nav-logo-icon {
             transform: rotate(-5deg) scale(1.1);
@@ -1764,7 +1779,7 @@
             width: 50px;
             height: 50px;
             background: rgba(255,255,255,0.1);
-            border-radius: 50%;
+
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1779,6 +1794,31 @@
             background: rgba(255,255,255,0.2);
             transform: translateY(-5px) rotate(360deg);
             border-color: white;
+        }
+
+        .nav-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Alternative: Make the container round for circular logo */
+        .nav-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-red);
+            transition: transform 0.3s ease;
+            overflow: hidden; /* Ensures image stays within bounds */
+        }
+
+        /* Keep the hover effect */
+        .nav-logo:hover .nav-logo-icon {
+            transform: rotate(-5deg) scale(1.1);
         }
 
         /* Footer */
@@ -2060,17 +2100,19 @@
         </div>
     </div>
 
-    <!-- Admin Button -->
-    <a href="admin.html" class="admin-btn">
+
+    <a href="/" class="admin-btn">
         <i class="fas fa-cog"></i>
         Admin Panel
     </a>
 
-    <!-- Navigation -->
+
     <nav id="navbar">
         <div class="nav-container">
             <a href="#home" class="nav-logo" onclick="scrollToTop()">
-                <div class="nav-logo-icon">PPI</div>
+                <div class="nav-logo-icon">
+                    <img src="/static/uploads/logo/LOGO%20PPIT.jpg" alt="PPIT Logo" class="nav-logo-img">
+                </div>
                 <span>PPIT</span>
             </a>
             <button class="mobile-toggle" onclick="toggleMobileMenu()">
@@ -2088,7 +2130,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="floating-shapes">
             <div class="shape"></div>
@@ -2107,7 +2148,9 @@
             </div>
             <div class="hero-image">
                 <div class="hero-image-wrapper">
-                    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='500' height='400' viewBox='0 0 500 400'><rect width='500' height='400' fill='%23f0f0f0'/><text x='250' y='200' text-anchor='middle' fill='%23666' font-size='20'>Gambar Komunitas PPIT</text></svg>" alt="PPI Tiongkok Community">
+                    <img src="/static/uploads/logo/LOGO PPIT.jpg" alt="PPI Tiongkok Community" 
+                    style="max-width: 400px; width: 100%; height: auto; border-radius: 15px;">
+               
                 </div>
             </div>
         </div>
@@ -2659,38 +2702,61 @@
                 const eventDate = new Date(event.date);
                 const dateStr = eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 
+                // Debug log to check event data
+                console.log('Event:', event.title, 'Category:', event.category);
+
                 return `
                 <div class="event-card" data-category="${event.category}">
                     <div class="event-image">
-                    <img src="${event.imageUrl}" alt="${event.title}">
-                    <div class="event-date-badge">${dateStr}</div>
+                        <img src="${event.imageUrl}" alt="${event.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'400\\' height=\\'250\\' viewBox=\\'0 0 400 250\\'><rect width=\\'400\\' height=\\'250\\' fill=\\'%23f0f0f0\\'/><text x=\\'200\\' y=\\'125\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'16\\'>${event.title}</text></svg>'">
+                        <div class="event-date-badge">${dateStr}</div>
                     </div>
                     <div class="event-content">
-                    <h3>${event.title}</h3>
-                    <div class="event-meta">
-                        <span>📍 ${event.location}</span>
-                        <span>🕐 ${event.time}</span>
-                    </div>
-                    <p>${event.description}</p>
+                        <h3>${event.title}</h3>
+                        <div class="event-meta">
+                            <span>📍 ${event.location}</span>
+                            <span>🕐 ${event.time}</span>
+                        </div>
+                        <p>${event.description}</p>
                     </div>
                 </div>
                 `;
             }).join('');
-            }
+        }
 
 
         function filterEvents(category) {
             const filterBtns = document.querySelectorAll('.events-filters .filter-btn');
             const eventCards = document.querySelectorAll('.event-card');
             
+            // Remove active class from all buttons
             filterBtns.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
             event.target.classList.add('active');
             
+            // Create category mapping
+            const categoryMap = {
+                'All': 'all',
+                'Upcoming': 'upcoming', 
+                'Ongoing': 'ongoing',
+                'Past': 'past'
+            };
+            
+            const filterValue = categoryMap[category] || category.toLowerCase();
+            
+            console.log('Filtering by:', filterValue); // Debug log
+            
             eventCards.forEach(card => {
-                if (category === 'all' || card.getAttribute('data-category') === category) {
+                const cardCategory = card.getAttribute('data-category');
+                console.log('Card category:', cardCategory); // Debug log
+                
+                if (filterValue === 'all' || cardCategory === filterValue) {
                     card.style.display = 'block';
+                    card.style.opacity = '1';
                 } else {
                     card.style.display = 'none';
+                    card.style.opacity = '0';
                 }
             });
         }

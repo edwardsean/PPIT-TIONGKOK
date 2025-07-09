@@ -522,6 +522,74 @@
             color: var(--text-light);
         }
 
+        input[type="file"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: var(--primary-red);
+            background: #fff;
+        }
+
+        input[type="file"]:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(139,21,56,0.1);
+        }
+
+        .file-upload-info {
+            margin-top: 0.5rem;
+        }
+
+        .file-upload-info small {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        /* Image preview styling */
+        #imagePreview {
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #previewImg {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Progress bar styling */
+        #uploadProgress {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        #progressBar {
+            background: linear-gradient(90deg, var(--primary-red), var(--secondary-red));
+            height: 6px;
+            border-radius: 3px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        #uploadStatus {
+            display: block;
+            margin-top: 0.5rem;
+            color: var(--primary-red);
+            font-weight: 500;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -596,6 +664,11 @@
                     <input type="password" name="password" required>
                 </div>
                 <button type="submit" class="login-btn">Login</button>
+
+                <a href="/mainpage" class="main-page-btn">
+                    <i class="fas fa-home"></i>
+                    Kembali ke Halaman Utama
+                </a>
                 <div class="login-error" id="loginError">Username atau password salah!</div>
             </form>
         
@@ -716,7 +789,7 @@
                     </button>
                 </div>
 
-                <form class="admin-form" id="eventForm" style="display: none;">
+                <form class="admin-form" id="eventForm" style="display: none;" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Nama Event</label>
                         <input type="text" name="title" required>
@@ -733,10 +806,27 @@
                         <label>Lokasi</label>
                         <input type="text" name="location" required>
                     </div>
+                    
+
                     <div class="form-group">
-                        <label>URL Gambar</label>
-                        <input type="url" name="imageUrl" placeholder="https://..." required>
+                        <label>Gambar Event</label>
+                        <input type="file" name="eventImage" accept="image/*" required id="eventImageInput">
+                        <div class="file-upload-info">
+                            <small>Format yang didukung: PNG, JPG, JPEG, GIF, WEBP (Max: 16MB)</small>
+                        </div>
+                        <!-- Preview area -->
+                        <div id="imagePreview" style="margin-top: 1rem; display: none;">
+                            <img id="previewImg" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #ddd;">
+                        </div>
+                        <!-- Loading indicator -->
+                        <div id="uploadProgress" style="display: none; margin-top: 1rem;">
+                            <div style="background: #f0f0f0; border-radius: 10px; overflow: hidden;">
+                                <div id="progressBar" style="background: var(--primary-red); height: 20px; width: 0%; transition: width 0.3s; border-radius: 10px;"></div>
+                            </div>
+                            <small id="uploadStatus">Uploading...</small>
+                        </div>
                     </div>
+                    
                     <div class="form-group">
                         <label>Kategori</label>
                         <select name="category" required>
@@ -752,7 +842,7 @@
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" onclick="hideEventForm()">Batal</button>
-                        <button type="submit" class="btn-primary">Simpan Event</button>
+                        <button type="submit" class="btn-primary" id="saveEventBtn">Simpan Event</button>
                     </div>
                 </form>
 
@@ -1052,24 +1142,32 @@
             const username = this.username.value;
             const password = this.password.value;
             const settings = JSON.parse(localStorage.getItem('ppit_settings'));
+            try {
+                const response = await fetch('/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
 
-            const response = await fetch('/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+                const result = await response.json();
+                if (!response.ok || result.error) {
+                    document.getElementById('loginError').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('loginError').style.display = 'none';
+                    }, 3000);
+                } else {
+                    sessionStorage.setItem('ppit_admin_logged_in', 'true');
+                    isLoggedIn = true;
+                    checkAuth();
+                }
 
-            const result = await response.json();
-            if (!response.ok) {
+            } catch(error) {
                 document.getElementById('loginError').style.display = 'block';
                 setTimeout(() => {
                     document.getElementById('loginError').style.display = 'none';
                 }, 3000);
-            } else {
-                sessionStorage.setItem('ppit_admin_logged_in', 'true');
-                isLoggedIn = true;
-                checkAuth();
             }
+            
         });
 
         // Logout
@@ -1180,6 +1278,20 @@
             }
         }
 
+        document.getElementById('eventImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    const img = document.getElementById('previewImg');
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         // Events Management
         function showEventForm() {
             document.getElementById('eventForm').style.display = 'grid';
@@ -1188,25 +1300,78 @@
         function hideEventForm() {
             document.getElementById('eventForm').style.display = 'none';
             document.getElementById('eventForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('uploadProgress').style.display = 'none';
         }
 
-        document.getElementById('eventForm').addEventListener('submit', function(e) {
+        document.getElementById('eventForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            const event = {
-                title: formData.get('title'),
-                date: formData.get('date'),
-                imageUrl: formData.get('imageUrl'),
-                time: formData.get('time'),
-                location: formData.get('location'),
-                category: formData.get('category'),
-                description: formData.get('description')
-            };
+            
+            const submitBtn = document.getElementById('saveEventBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Menyimpan...';
+            
+            try {
+                // First, upload the image
+                const fileInput = document.getElementById('eventImageInput');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    throw new Error('Please select an image file');
+                }
+                
+                // Show upload progress
+                document.getElementById('uploadProgress').style.display = 'block';
+                document.getElementById('uploadStatus').textContent = 'Uploading image...';
+                
+                // Create FormData for file upload
+                const uploadFormData = new FormData();
+                uploadFormData.append('eventImage', file);
+                
+                // Upload image
+                const uploadResponse = await fetch('/upload-event-image', {
+                    method: 'POST',
+                    body: uploadFormData
+                });
+                
+                const uploadResult = await uploadResponse.json();
+                
+                if (!uploadResponse.ok) {
+                    throw new Error(uploadResult.error || 'Upload failed');
+                }
+                
+                // Update progress
+                document.getElementById('uploadStatus').textContent = 'Saving event...';
+                
+                // Create event data with uploaded image URL
+                const formData = new FormData(this);
+                const event = {
+                    title: formData.get('title'),
+                    date: formData.get('date'),
+                    imageUrl: uploadResult.imageUrl, // Use uploaded image URL
+                    time: formData.get('time'),
+                    location: formData.get('location'),
+                    category: formData.get('category'),
+                    description: formData.get('description')
+                };
 
-            storage.add('events', event);
-            showSuccess('Event berhasil ditambahkan!');
-            hideEventForm();
-            loadEvents();
+                // Save event to localStorage
+                storage.add('events', event);
+                
+                // Hide progress and show success
+                document.getElementById('uploadProgress').style.display = 'none';
+                showSuccess('Event berhasil ditambahkan!');
+                hideEventForm();
+                loadEvents();
+                
+            } catch (error) {
+                document.getElementById('uploadProgress').style.display = 'none';
+                alert('Error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
         });
 
         function loadEvents() {
@@ -1240,10 +1405,51 @@
             }
         }
 
-        function deleteEvent(id) {
-            if (confirm('Yakin ingin menghapus event ini?')) {
+        async function deleteEvent(id) {
+            if (!confirm('Yakin ingin menghapus event ini? Gambar yang terkait juga akan dihapus.')) {
+                return;
+            }
+            
+            try {
+                // Get the event data first to get the image URL
+                const events = storage.get('events');
+                const eventToDelete = events.find(event => event.id === id);
+                
+                if (!eventToDelete) {
+                    throw new Error('Event tidak ditemukan');
+                }
+                
+                // Call backend to delete the image file
+                const response = await fetch(`/delete-event/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        imageUrl: eventToDelete.imageUrl 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Remove from localStorage after successful file deletion
+                    storage.delete('events', id);
+                    showSuccess('Event dan gambar berhasil dihapus!');
+                    loadEvents();
+                    console.log('Backend response:', result.message);
+                } else {
+                    // Even if file deletion fails, still remove from localStorage
+                    storage.delete('events', id);
+                    showSuccess('Event dihapus (ada masalah dengan penghapusan file)');
+                    loadEvents();
+                    console.warn('File deletion issue:', result.error);
+                }
+                
+            } catch (error) {
+                console.error('Error deleting event:', error);
+                
+                // Fallback: delete from localStorage even if backend call fails
                 storage.delete('events', id);
-                showSuccess('Event berhasil dihapus!');
+                showSuccess('Event dihapus dari daftar (mungkin ada masalah dengan penghapusan file)');
                 loadEvents();
             }
         }
@@ -1453,7 +1659,13 @@
                 alert(result.error);
             } else {
                 alert('Password berhasil diubah!');
+                document.querySelector('input[name="oldPassword"]').value = "";
+                document.querySelector('input[name="newPassword"]').value = "";
+                document.querySelector('input[name="confirmPassword"]').value = "";
+
             }
+
+            
         });
 
         // Initialize
