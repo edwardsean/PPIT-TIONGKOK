@@ -67,21 +67,15 @@ def uploaded_file(filename):
 @app.route('/delete-event/<event_id>', methods=['DELETE'])
 def delete_event(event_id):
     try:
-        # Read current events from a file or database
-        # Since you're using localStorage, we need to get the image URL from the request
         data = request.json
         image_url = data.get('imageUrl', '')
         
-        # Extract filename from URL
         if image_url and '/static/uploads/events/' in image_url:
-            # Parse the URL to get just the filename
             parsed_url = urlparse(image_url)
             filename = os.path.basename(parsed_url.path)
             
-            # Construct the full file path
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             
-            # Delete the file if it exists
             if os.path.exists(file_path):
                 os.remove(file_path)
                 print(f"Deleted file: {file_path}")
