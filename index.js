@@ -19,6 +19,10 @@ app.get("/", (req, res) => {
     res.sendFile(join(__dirname, "/templates/mainpage.html"))
 });
 
+app.get("/mainpage", (req, res) => {
+    res.sendFile(join(__dirname, "/templates/mainpage.html"))
+});
+
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
