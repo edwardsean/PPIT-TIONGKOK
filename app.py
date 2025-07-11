@@ -8,7 +8,7 @@ import uuid
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__)
 
 UPLOAD_FOLDER = 'static/uploads/events'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -135,5 +135,3 @@ def verify():
     else :
         return jsonify({'error': 'Kesalahan terjadi di username atau password'}), 401
     
-if __name__ == '__main__':
-    app.run(debug=True)
