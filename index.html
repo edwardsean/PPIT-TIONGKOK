@@ -1150,7 +1150,7 @@
                 });
 
                 const result = await response.json();
-                if (!response.ok || result.error) {
+                if (!response.success) {
                     document.getElementById('loginError').style.display = 'block';
                     setTimeout(() => {
                         document.getElementById('loginError').style.display = 'none';
