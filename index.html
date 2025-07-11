@@ -1151,11 +1151,13 @@
 
                 const result = await response.json();
                 if (!response.success) {
+                    console.log('Login failed:', result.message);
                     document.getElementById('loginError').style.display = 'block';
                     setTimeout(() => {
                         document.getElementById('loginError').style.display = 'none';
                     }, 3000);
                 } else {
+                    console.log('Login successful:', result);
                     sessionStorage.setItem('ppit_admin_logged_in', 'true');
                     isLoggedIn = true;
                     checkAuth();
