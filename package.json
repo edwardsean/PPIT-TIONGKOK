@@ -1,0 +1,25 @@
+{
+  "name": "ppit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edwardsean/PPIT-TIONGKOK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/edwardsean/PPIT-TIONGKOK/issues"
+  },
+  "homepage": "https://github.com/edwardsean/PPIT-TIONGKOK#readme",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0"
+  }
+}
