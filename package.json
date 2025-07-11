@@ -20,6 +20,7 @@
   "homepage": "https://github.com/edwardsean/PPIT-TIONGKOK#readme",
   "dependencies": {
     "body-parser": "^2.2.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "multer": "^2.0.1"
   }
 }
