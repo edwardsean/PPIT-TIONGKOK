@@ -1150,7 +1150,7 @@
                 });
 
                 const result = await response.json();
-                if (!response.success) {
+                if (!result.success) {
                     console.log('Login failed:', result.message);
                     document.getElementById('loginError').style.display = 'block';
                     setTimeout(() => {
