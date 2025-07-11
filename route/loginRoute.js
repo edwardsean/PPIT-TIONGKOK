@@ -13,8 +13,8 @@ router.get("/", (req, res) => {
 router.post("/verify", (req, res) => {
     const { username, password } = req.body;
     
-    const validUsername = process.env.ADMIN_USERNAME;
-    const validPassword = process.env.ADMIN_PASSWORD;
+    const validUsername = process.env.USERNAME;
+    const validPassword = process.env.PASSWORD;
 
     if (username === validUsername && password === validPassword) {
         res.json({ success: true, message: "Login successful" });
