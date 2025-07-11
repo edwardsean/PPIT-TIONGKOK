@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import loginRoute from './route/loginRoute.js'; 
-import uploadEventRoute from './route/uploadEventRoute.js'; // Assuming you have this route
+// import uploadEventRoute from './route/uploadEventRoute.js'; // Assuming you have this route
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
