@@ -1332,7 +1332,7 @@
                 uploadFormData.append('eventImage', file);
                 
                 // Upload image
-                const uploadResponse = await fetch('/upload-event-image', {
+                const uploadResponse = await fetch('/api/upload-event', {
                     method: 'POST',
                     body: uploadFormData
                 });
