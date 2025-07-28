@@ -1,11 +1,34 @@
 {
   "version": 2,
-  "builds": [{
-    "src": "index.js",
-    "use": "@vercel/node"
-  }],
-  "routes": [{
-    "src": "/(.*)", 
-    "dest": "index.js"
-  }]
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "index.js"
+    },
+    {
+      "src": "/login/(.*)",
+      "dest": "index.js"
+    },
+    {
+      "src": "/delete-event/(.*)",
+      "dest": "index.js"
+    },
+    {
+      "src": "/change-password",
+      "dest": "index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
