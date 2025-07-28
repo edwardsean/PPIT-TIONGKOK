@@ -49,11 +49,11 @@ router.post("/", upload.single("eventImage"), async (req, res) => {
 
     try {
         const insertQuery = `
-            INSERT INTO event_images (filename, url, uploaded_at)
-            VALUES ($1, $2, $3)
+            INSERT INTO event_images (file_name, url)
+            VALUES ($1, $2)
             RETURNING id
         `;
-        const result = await db.query(insertQuery, [filename, url, uploadedAt]);
+        const result = await db.query(insertQuery, [filename, url]);
 
         res.json({
             message: "Upload successful",
